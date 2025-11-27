@@ -1,0 +1,72 @@
+module counter_2bit(input rst,clk,
+                    output reg[1:0]count);
+
+   always@(posedge clk)
+	    begin
+		   if(rst)
+			 count<=0;
+			  else
+			   count<=count+1;
+		 end
+endmodule
+
+module decoder_2bit(input [1:0]in,output reg[3:0]y);
+
+  always@(*)begin
+    case (in)
+		      2'b00: y = 4'b0001;
+            2'b01: y = 4'b0010;
+            2'b10: y = 4'b0100;
+            2'b11: y = 4'b1000;
+            default: y = 4'b0000;
+		endcase
+		end
+endmodule
+
+module ring_count(
+    input rst,
+    input clk,
+    output [3:0] q
+);		
+
+   wire [1:0] count;
+
+   counter_2bit  c1 (.rst(rst), .clk(clk), .count(count));
+   decoder_2bit  c2 (.in(count), .y(q));
+
+endmodule
+/////////////////////////////////TB////////////////////////////////
+module tb_ring;
+
+	// Inputs
+	reg rst;
+	reg clk;
+
+	// Outputs
+	wire [3:0] q;
+
+	// Instantiate the Unit Under Test (UUT)
+	ring_count uut (
+		.rst(rst), 
+		.clk(clk), 
+		.q(q)
+	);
+
+	initial begin
+		// Initialize Inputs
+		rst = 0;
+		clk = 0;
+		forever #5 clk = ~clk;
+	end
+	
+  initial begin
+    @(posedge clk)
+	 rst=1;
+	 @(posedge clk)
+	 rst=0;
+	
+	end
+      
+endmodule
+
+
